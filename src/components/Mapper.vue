@@ -27,7 +27,7 @@
   //import {defaults as defaultInteractions} from 'ol/interaction';
   import {Vector as VectorLayer} from 'ol/layer';
   //import VectorSource from 'ol/source/Vector';
-
+  import { Pointer as PointerInteraction,} from 'ol/interaction';
 
   export default {
     name: 'Mapper',
@@ -36,6 +36,8 @@
             map: null,
             featureLayer:null,
             featureSource:null,
+            coordinate_ :null,
+            feature_ : null,
             source:new VectorSource({wrapX: false}),
             pointFeature : new Feature(new Point([0, 0])),
             //pointFeature2 : new Feature(new Point([0, 1])),
@@ -95,13 +97,22 @@
           console.log('创建地图');
           console.log(this.map);
           this.map.addControl(mousePositionControl);
+
+
+          var pi = new PointerInteraction({
+                              handleDownEvent: this.handleDownEvent,
+                              handleDragEvent: this.handleDragEvent,
+                              handleMoveEvent: this.handleMoveEvent,
+                              handleUpEvent: this.handleUpEvent,
+                            });
+          this.map.addInteraction(pi);
         },
         initFeatureLayer(){
           this.featureLayer = new VectorLayer({
                 style: new Style({
                   image: new Icon({
-                    anchor: [0.5, 46],
-                    anchorXUnits: 'fraction',
+                    anchor: [0.5, 0.5],
+                    anchorXUnits: 'pixels',
                     anchorYUnits: 'pixels',
                     opacity: 1,
                     src: './data/position.png',
@@ -122,10 +133,69 @@
         },
         initData()
         {        
-          var pF = new Feature(new Point([0, 0]));
+          var pF = new Feature(new Point([101, 36]));
+
           this.featureSource.addFeature(pF);
-          console.log(this.pointFeaturs);
-        } 
+
+          
+          var geometry = pF.getGeometry();
+          geometry.translate(100, 100);
+          console.log(geometry);
+          this.featureLayer.changed();
+          //pF = new Feature(new Point([151, 36]));
+
+          //this.featureSource.addFeature(pF);
+        },
+        handleDownEvent(evt) {
+          var map = evt.map;
+          var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+            return feature;
+          });
+
+          if (feature) {
+            this.coordinate_ = evt.coordinate;
+            this.feature_ = feature;
+          }
+
+          return !!feature;
+        },
+        handleDragEvent(evt) {
+          console.log('handleDragEvent');
+          var deltaX = evt.coordinate[0] - this.coordinate_[0];
+          var deltaY = evt.coordinate[1] - this.coordinate_[1];
+
+          var geometry = this.feature_.getGeometry();
+          console.log(deltaX +' ' +deltaY);
+          geometry.translate(deltaX, deltaY);
+
+          this.coordinate_[0] = evt.coordinate[0];
+          this.coordinate_[1] = evt.coordinate[1];
+        },
+        handleMoveEvent(evt) {
+          console.log('handleMoveEvent');
+          if (this.cursor_) {
+            var map = evt.map;
+            var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+              return feature;
+            });
+            var element = evt.map.getTargetElement();
+            if (feature) {
+              if (element.style.cursor != this.cursor_) {
+                this.previousCursor_ = element.style.cursor;
+                element.style.cursor = this.cursor_;
+              }
+            } else if (this.previousCursor_ !== undefined) {
+              element.style.cursor = this.previousCursor_;
+              this.previousCursor_ = undefined;
+            }
+          }
+        },
+        handleUpEvent() {
+          this.coordinate_ = null;
+          this.feature_ = null;
+          return false;
+        }
+
     },
     mounted() {
         console.log('初始化地图');
