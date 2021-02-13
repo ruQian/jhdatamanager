@@ -20,13 +20,13 @@
   //import { fromLonLat, transform, toLonLat } from "ol/proj";
   //import fromLonLat from "ol/proj";
   import Feature from 'ol/Feature';
-
-  import Draw from 'ol/interaction/Draw';
+  //import Draw from 'ol/interaction/Draw';
   import {Vector as VectorSource} from 'ol/source';
   import {Fill, Icon, Stroke, Style} from 'ol/style';
   import {LineString, Point, Polygon} from 'ol/geom';
   //import {defaults as defaultInteractions} from 'ol/interaction';
   import {Vector as VectorLayer} from 'ol/layer';
+  //import VectorSource from 'ol/source/Vector';
 
 
   export default {
@@ -34,9 +34,12 @@
     data() {
         return {
             map: null,
+            featureLayer:null,
+            featureSource:null,
             source:new VectorSource({wrapX: false}),
-            pointFeature : new Feature(new Point([0, 100])),
-            pointFeature2 : new Feature(new Point([0, 1])),
+            pointFeature : new Feature(new Point([0, 0])),
+            //pointFeature2 : new Feature(new Point([0, 1])),
+            pointFeaturs: [],
             lineFeature: new Feature(
               new LineString([
               [-1e7, 1e6],
@@ -82,11 +85,19 @@
                 source: new XYZ({
                   url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
                 })
-              }),
-              new VectorLayer({
-                source: new VectorSource({
-                  features: [this.pointFeature, this.pointFeature2],
-                }),
+              })],
+            view: new View({
+              center: [0, 0],
+              zoom: 2,
+              //extent: transformExtent(extent, 'EPSG:4326', 'EPSG:3857')
+            })
+          });
+          console.log('创建地图');
+          console.log(this.map);
+          this.map.addControl(mousePositionControl);
+        },
+        initFeatureLayer(){
+          this.featureLayer = new VectorLayer({
                 style: new Style({
                   image: new Icon({
                     anchor: [0.5, 46],
@@ -103,37 +114,25 @@
                     color: [0, 0, 255, 0.6],
                   }),
                 }),
-              })],
-            view: new View({
-              center: [0, 0],
-              zoom: 2,
-              //extent: transformExtent(extent, 'EPSG:4326', 'EPSG:3857')
-            })
-          });
-          console.log('创建地图');
-          console.log(this.map);
-          this.map.addControl(mousePositionControl);
+              });
+              console.log("添加Vector图层");
+              this.map.addLayer(this.featureLayer);
+              this.featureSource = new VectorSource();
+              this.featureLayer.setSource(this.featureSource);
         },
-        addInteraction() {
-          //var typeSelect = document.getElementById('type');
-
-          var draw;
-          var value = 'Point';
-          if (value !== 'None') {
-            draw = new Draw({
-              source: this.source,
-              type: 'Point',
-            });
-            this.map.addInteraction(draw);
-          }
-        }
+        initData()
+        {        
+          var pF = new Feature(new Point([0, 0]));
+          this.featureSource.addFeature(pF);
+          console.log(this.pointFeaturs);
+        } 
     },
     mounted() {
-      console.log('初始化地图');
+        console.log('初始化地图');
         this.initMap();
-      console.log('开始标注');
-        //添加标注
-        //this.addInteraction();
+        console.log('开始标注');
+        this.initFeatureLayer();
+        this.initData();
     }
   }
 </script>
