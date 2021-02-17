@@ -27,7 +27,10 @@
     name: 'Mapper',
     data() {
         return {
+            //当前的工作模式
+            mode:0,
             map: null,
+            editButton:null,
             mapdata:[],
             featureLayer:null,
             featureSource:null,
@@ -90,24 +93,24 @@
             //未定义坐标的标记
             undefinedHTML: "&nbsp;"
           });
+          var editHandle = this.handleRotateNorth;
           //var extent = boundingExtent(
           //  [[73.68310533463954,55.71875543651788],
           //  [135.19995117187501,15.911160631253153]]);
           var RotateNorthControl = /*@__PURE__*/(function (Control) {
-            console.log('1212');
-            function RotateNorthControl(opt_options) {
+              function RotateNorthControl(opt_options) {
               console.log('RotateNorthControl');
               var options = opt_options || {};
-              var button = document.createElement('button');
-              button.innerHTML = 'E';
+              this.editButton = document.createElement('button');
+              this.editButton.innerHTML = 'A';
               var element = document.createElement('div');
               element.className = 'rotate-north ol-unselectable ol-control';
-              element.appendChild(button);
+              element.appendChild(this.editButton);
               Control.call(this, {
                 element: element,
                 target: options.target
               });
-              button.addEventListener('click', this.handleRotateNorth.bind(this), false);
+              this.editButton.addEventListener('click', this.handleRotateNorth.bind(this), false);
             }
             if ( Control )
             {
@@ -120,9 +123,7 @@
             
             RotateNorthControl.prototype = Object.create( Control && Control.prototype );
             RotateNorthControl.prototype.constructor = RotateNorthControl;
-            RotateNorthControl.prototype.handleRotateNorth = function handleRotateNorth () {
-            this.getMap().getView().setRotation(90);
-            };
+            RotateNorthControl.prototype.handleRotateNorth = editHandle;
             return RotateNorthControl;
           }(Control));
 
@@ -238,8 +239,27 @@
           this.coordinate_ = null;
           this.feature_ = null;
           return false;
-        }
-
+        },
+        handleRotateNorth() 
+            {
+              console.log('handleRotateNorth : ' + this.mode);
+              console.log(this.editButton);
+              if(this.mode == 0)
+              {
+                //处于编辑模式
+                this.mode = 1;
+                this.editButton.innerHTML('O');
+                console.log('O');
+              }
+              if(this.mode == 1)
+              {
+                //处于编辑模式
+                this.mode = 0;
+                this.editButton.innerHTML('E');
+                console.log('E');
+              }
+              //this.getMap().getView().setRotation(90);
+            }
     },
     mounted() {
         console.log('获取地图数据.');
