@@ -5,39 +5,36 @@
 </template>
 
 <script>
-  //import HelloWorld from './components/HelloWorld.vue'
   import 'ol/ol.css';
   import Map from 'ol/Map';
   import View from 'ol/View';
   import TileLayer from 'ol/layer/Tile';
   import XYZ from 'ol/source/XYZ';
-  //import {boundingExtent} from 'ol/extent';
-  //import {transformExtent} from 'ol/proj';
   import MousePosition from "ol/control/MousePosition";
   import {createStringXY} from 'ol/coordinate';
-  //import { defaults as defaultControls} from "ol/control";
-  //import Overlay from "ol/Overlay";
-  //import { fromLonLat, transform, toLonLat } from "ol/proj";
-  //import fromLonLat from "ol/proj";
   import Feature from 'ol/Feature';
-  //import Draw from 'ol/interaction/Draw';
   import {Vector as VectorSource} from 'ol/source';
   import {Fill, Icon, Stroke, Style} from 'ol/style';
   import {LineString, Point, Polygon} from 'ol/geom';
-  //import {defaults as defaultInteractions} from 'ol/interaction';
   import {Vector as VectorLayer} from 'ol/layer';
-  //import VectorSource from 'ol/source/Vector';
   import { Pointer as PointerInteraction,} from 'ol/interaction';
+  import { fromLonLat} from "ol/proj";
+  import {fetchData} from '../api/index';
+  import {Control} from 'ol/control';
+  import {defaults as defaultControls} from 'ol/control';
 
   export default {
     name: 'Mapper',
     data() {
         return {
             map: null,
+            mapdata:[],
             featureLayer:null,
             featureSource:null,
             coordinate_ :null,
             feature_ : null,
+            features:null,
+            RotateNorthControl:null,
             source:new VectorSource({wrapX: false}),
             pointFeature : new Feature(new Point([0, 0])),
             //pointFeature2 : new Feature(new Point([0, 1])),
@@ -58,6 +55,23 @@
         };
     },
     methods: {
+        getData() {
+          console.log('获取地图数据');
+          fetchData( ).then(res => {
+                    if(res != null)
+                    {
+                      console.log('收到了数据!');
+                      console.log(res);
+                      //确保有数据
+                      this.mapdata = res;
+                      this.mapdata.forEach(feature =>{
+                            console.log('添加标注点 :' + feature.lon + '-' + feature.lat);
+                            this.AddFeature(feature.lon, feature.lat);
+                        }
+                      )
+                    }
+                });
+        },
         /**
          * 初始化一个 openlayers 地图
          */
@@ -79,9 +93,43 @@
           //var extent = boundingExtent(
           //  [[73.68310533463954,55.71875543651788],
           //  [135.19995117187501,15.911160631253153]]);
+          var RotateNorthControl = /*@__PURE__*/(function (Control) {
+            console.log('1212');
+            function RotateNorthControl(opt_options) {
+              console.log('RotateNorthControl');
+              var options = opt_options || {};
+              var button = document.createElement('button');
+              button.innerHTML = 'E';
+              var element = document.createElement('div');
+              element.className = 'rotate-north ol-unselectable ol-control';
+              element.appendChild(button);
+              Control.call(this, {
+                element: element,
+                target: options.target
+              });
+              button.addEventListener('click', this.handleRotateNorth.bind(this), false);
+            }
+            if ( Control )
+            {
+              console.log('Control');
+              RotateNorthControl.__proto__ = Control;
+            } 
+            console.log(Control);
+            var u = Object.create( Control && Control.prototype );
+            RotateNorthControl.prototype = u;
+            
+            RotateNorthControl.prototype = Object.create( Control && Control.prototype );
+            RotateNorthControl.prototype.constructor = RotateNorthControl;
+            RotateNorthControl.prototype.handleRotateNorth = function handleRotateNorth () {
+            this.getMap().getView().setRotation(90);
+            };
+            return RotateNorthControl;
+          }(Control));
+
+
           this.map = new Map({
             target: target,
-            //controls: defaultControls({ zoom: false }).extend([]),
+            controls: defaultControls().extend([new RotateNorthControl()]),
             layers: [
               new TileLayer({
                 source: new XYZ({
@@ -89,7 +137,7 @@
                 })
               })],
             view: new View({
-              center: [0, 0],
+              center: fromLonLat([103, 34]),
               zoom: 2,
               //extent: transformExtent(extent, 'EPSG:4326', 'EPSG:3857')
             })
@@ -131,20 +179,16 @@
               this.featureSource = new VectorSource();
               this.featureLayer.setSource(this.featureSource);
         },
-        initData()
-        {        
-          var pF = new Feature(new Point([101, 36]));
-
+        AddFeature(lon, lat)
+        {
+          var pp = fromLonLat([lon, lat]);
+          console.log('point - '+pp);
+          var pF = new Feature(
+                  {
+                    geometry: new Point(pp)
+                  }
+                  );
           this.featureSource.addFeature(pF);
-
-          
-          var geometry = pF.getGeometry();
-          geometry.translate(100, 100);
-          console.log(geometry);
-          this.featureLayer.changed();
-          //pF = new Feature(new Point([151, 36]));
-
-          //this.featureSource.addFeature(pF);
         },
         handleDownEvent(evt) {
           var map = evt.map;
@@ -198,11 +242,12 @@
 
     },
     mounted() {
+        console.log('获取地图数据.');
+        this.getData();
         console.log('初始化地图');
         this.initMap();
         console.log('开始标注');
         this.initFeatureLayer();
-        this.initData();
     }
   }
 </script>
@@ -220,4 +265,8 @@
         width: 100%;
         height:100vh;
       }
+.rotate-north {
+  top: 65px;
+  left: .5em;
+}
 </style>
