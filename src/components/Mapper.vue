@@ -14,12 +14,13 @@
   import {createStringXY} from 'ol/coordinate';
   import Feature from 'ol/Feature';
   import {Vector as VectorSource} from 'ol/source';
-  import {Fill, Icon, Stroke, Style} from 'ol/style';
+  //import {Fill, Icon, Stroke, Style} from 'ol/style';
+  import {Icon, Style} from 'ol/style';
   import {LineString, Point, Polygon} from 'ol/geom';
   import {Vector as VectorLayer} from 'ol/layer';
   import { Pointer as PointerInteraction,} from 'ol/interaction';
-  import { fromLonLat} from "ol/proj";
-  import {fetchData} from '../api/index';
+  import {toLonLat, fromLonLat} from "ol/proj";
+  import {fetchData, uploadFeatureApi} from '../api/index';
   import {Control} from 'ol/control';
   import {defaults as defaultControls} from 'ol/control';
 
@@ -27,7 +28,7 @@
     name: 'Mapper',
     data() {
         return {
-            //当前的工作模式
+            //当前的工作模式 0 普通  1 添加标注
             mode:0,
             map: null,
             editButton:null,
@@ -35,13 +36,21 @@
             featureLayer:null,
             featureSource:null,
             coordinate_ :null,
+
+            //鼠标点击拖动feature需要的变量
             feature_ : null,
+            //添加标注需要的变量
+            featureAdd:null,
+            editfeature_ : null,
             features:null,
             RotateNorthControl:null,
             source:new VectorSource({wrapX: false}),
-            pointFeature : new Feature(new Point([0, 0])),
-            //pointFeature2 : new Feature(new Point([0, 1])),
             pointFeaturs: [],
+            //正常
+            pointStyle:null,
+            //编辑
+            editStyle:null,
+
             lineFeature: new Feature(
               new LineString([
               [-1e7, 1e6],
@@ -69,10 +78,32 @@
                       this.mapdata = res;
                       this.mapdata.forEach(feature =>{
                             console.log('添加标注点 :' + feature.lon + '-' + feature.lat);
-                            this.AddFeature(feature.lon, feature.lat);
+                            this.AddFeature(feature.lon, feature.lat, this.pointStyle);
                         }
                       )
                     }
+                });
+        },
+        //初始化点风格
+        initFeatureStyle()
+        {
+            this.editStyle = new Style({
+                  image: new Icon({
+                    anchor: [0.5, 0.5],
+                    anchorXUnits: 'pixels',
+                    anchorYUnits: 'pixels',
+                    opacity: 1,
+                    src: './data/addFeature.png',
+                  })
+                });
+            this.pointStyle = new Style({
+                  image: new Icon({
+                    anchor: [0.5, 0.5],
+                    anchorXUnits: 'pixels',
+                    anchorYUnits: 'pixels',
+                    opacity: 1,
+                    src: './data/position.png',
+                  })
                 });
         },
         /**
@@ -93,40 +124,40 @@
             //未定义坐标的标记
             undefinedHTML: "&nbsp;"
           });
-          var editHandle = this.handleRotateNorth;
+          var editHandle = this.handleAddFeature;
+          var btn = null;
           //var extent = boundingExtent(
           //  [[73.68310533463954,55.71875543651788],
           //  [135.19995117187501,15.911160631253153]]);
-          var RotateNorthControl = /*@__PURE__*/(function (Control) {
-              function RotateNorthControl(opt_options) {
-              console.log('RotateNorthControl');
-              var options = opt_options || {};
-              this.editButton = document.createElement('button');
-              this.editButton.innerHTML = 'A';
-              var element = document.createElement('div');
-              element.className = 'rotate-north ol-unselectable ol-control';
-              element.appendChild(this.editButton);
-              Control.call(this, {
-                element: element,
-                target: options.target
-              });
-              this.editButton.addEventListener('click', this.handleRotateNorth.bind(this), false);
-            }
-            if ( Control )
-            {
-              console.log('Control');
-              RotateNorthControl.__proto__ = Control;
-            } 
-            console.log(Control);
-            var u = Object.create( Control && Control.prototype );
-            RotateNorthControl.prototype = u;
-            
-            RotateNorthControl.prototype = Object.create( Control && Control.prototype );
-            RotateNorthControl.prototype.constructor = RotateNorthControl;
-            RotateNorthControl.prototype.handleRotateNorth = editHandle;
-            return RotateNorthControl;
+          var RotateNorthControl = /*@__PURE__*/(function (Control) 
+          {
+              function RotateNorthControl(opt_options) 
+              {
+                  var options = opt_options || {};
+                  btn = document.createElement('button');
+                  btn.innerHTML = 'A';
+                  var element = document.createElement('div');
+                  element.className = 'rotate-north ol-unselectable ol-control';
+                  element.appendChild(btn);
+                  Control.call(this, {
+                    element: element,
+                    target: options.target
+                  });
+                  btn.addEventListener('click', this.handleRotateNorth.bind(this), false);
+              }
+              if ( Control )
+              {
+                RotateNorthControl.__proto__ = Control;
+              } 
+              console.log(Control);
+              var u = Object.create( Control && Control.prototype );
+              RotateNorthControl.prototype = u;
+              
+              RotateNorthControl.prototype = Object.create( Control && Control.prototype );
+              RotateNorthControl.prototype.constructor = RotateNorthControl;
+              RotateNorthControl.prototype.handleRotateNorth = editHandle;
+              return RotateNorthControl;
           }(Control));
-
 
           this.map = new Map({
             target: target,
@@ -147,6 +178,8 @@
           console.log(this.map);
           this.map.addControl(mousePositionControl);
 
+          this.editButton = btn;
+          console.log(btn);
 
           var pi = new PointerInteraction({
                               handleDownEvent: this.handleDownEvent,
@@ -155,43 +188,52 @@
                               handleUpEvent: this.handleUpEvent,
                             });
           this.map.addInteraction(pi);
+          this.initFeatureStyle();
         },
         initFeatureLayer(){
-          this.featureLayer = new VectorLayer({
-                style: new Style({
-                  image: new Icon({
-                    anchor: [0.5, 0.5],
-                    anchorXUnits: 'pixels',
-                    anchorYUnits: 'pixels',
-                    opacity: 1,
-                    src: './data/position.png',
-                  }),
-                  stroke: new Stroke({
-                    width: 3,
-                    color: [255, 0, 0, 1],
-                  }),
-                  fill: new Fill({
-                    color: [0, 0, 255, 0.6],
-                  }),
-                }),
-              });
+          this.featureLayer = new VectorLayer();
               console.log("添加Vector图层");
               this.map.addLayer(this.featureLayer);
               this.featureSource = new VectorSource();
               this.featureLayer.setSource(this.featureSource);
         },
-        AddFeature(lon, lat)
+        AddFeature(lon, lat, style)
         {
           var pp = fromLonLat([lon, lat]);
-          console.log('point - '+pp);
           var pF = new Feature(
                   {
                     geometry: new Point(pp)
                   }
                   );
+          pF.setStyle(style);
           this.featureSource.addFeature(pF);
+          return pF;
         },
-        handleDownEvent(evt) {
+        RemoveFeature(fea)
+        {
+          this.featureSource.removeFeature(fea);
+        },
+        handleDownEvent(evt) 
+        {
+          if(this.mode == 1)
+          {
+              var lon = evt.coordinate[0];
+              var lat = evt.coordinate[1];
+              var lonlat = toLonLat([lon, lat]);
+              //向服务器上传该标记点
+              var paramsData = new Object();
+              var data = new Object();
+              data.name = '';
+              data.uid = '';
+              data.lon = lonlat[0];
+              data.lat = lonlat[1];
+              paramsData['data']
+              uploadFeatureApi( ).then(res => {});
+              //添加标注
+              this.AddFeature(lonlat[0], lonlat[1], this.pointStyle);
+              this.switchMode(0);
+          }
+          /*
           var map = evt.map;
           var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
             return feature;
@@ -201,11 +243,11 @@
             this.coordinate_ = evt.coordinate;
             this.feature_ = feature;
           }
-
-          return !!feature;
+          return !!feature;*/
         },
-        handleDragEvent(evt) {
-          console.log('handleDragEvent');
+        handleDragEvent(evt) 
+        {
+          /*
           var deltaX = evt.coordinate[0] - this.coordinate_[0];
           var deltaY = evt.coordinate[1] - this.coordinate_[1];
 
@@ -214,11 +256,47 @@
           geometry.translate(deltaX, deltaY);
 
           this.coordinate_[0] = evt.coordinate[0];
-          this.coordinate_[1] = evt.coordinate[1];
+          this.coordinate_[1] = evt.coordinate[1];*/
         },
-        handleMoveEvent(evt) {
-          console.log('handleMoveEvent');
-          if (this.cursor_) {
+        switchMode(mode)
+        {
+            if(mode == 1)
+            {
+                //切换到编辑模式下
+                if(this.mode == 0)
+                {
+                    this.mode = 1;
+                    this.featureAdd = this.AddFeature(0, 0, this.editStyle);
+                }
+            }
+            if(mode == 0)
+            {
+                //切换到普通模式下
+                if(this.mode == 1)
+                {
+                    this.mode = 0;
+                    this.RemoveFeature(this.featureAdd);
+                    this.featureAdd = null;
+                }
+            }
+        },
+        handleMoveEvent(evt) 
+        {
+          //console.log(evt);
+          if(this.mode == 1 && this.featureAdd != null)
+          {
+              var lon = evt.coordinate[0];
+              var lat = evt.coordinate[1];
+              var lanlat = toLonLat([lon, lat]);
+              //var pp = fromLonLat([lon, lat]);
+              //console.log(pp);'XY'
+              var p = this.featureAdd.getGeometry();
+              //console.log(lanlat);
+              p.setCoordinates([lon, lat]);
+          }
+          /*
+          if (this.cursor_) 
+          {
             var map = evt.map;
             var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
               return feature;
@@ -233,33 +311,46 @@
               element.style.cursor = this.previousCursor_;
               this.previousCursor_ = undefined;
             }
-          }
+          }*/
         },
-        handleUpEvent() {
+        handleUpEvent() 
+        {
+          /*
           this.coordinate_ = null;
           this.feature_ = null;
-          return false;
+          return false;*/
         },
         handleRotateNorth() 
-            {
-              console.log('handleRotateNorth : ' + this.mode);
-              console.log(this.editButton);
-              if(this.mode == 0)
-              {
-                //处于编辑模式
-                this.mode = 1;
-                this.editButton.innerHTML('O');
-                console.log('O');
-              }
-              if(this.mode == 1)
-              {
-                //处于编辑模式
-                this.mode = 0;
-                this.editButton.innerHTML('E');
-                console.log('E');
-              }
-              //this.getMap().getView().setRotation(90);
-            }
+        {
+          console.log('handleRotateNorth : ' + this.mode);
+          console.log(this.editButton);
+          if(this.mode == 0)
+          {
+            //处于编辑模式
+            this.mode = 1;
+            this.editButton.innerHTML = 'O';
+            console.log('O');
+          }else
+          if(this.mode == 1)
+          {
+            //处于编辑模式
+            this.mode = 0;
+            this.editButton.innerHTML = 'E';
+            console.log('E');
+          }
+          //this.getMap().getView().setRotation(90);
+        },
+        //添加标注
+        handleAddFeature()
+        {
+          if(this.mode != 1)
+          {
+            this.switchMode(1);
+          }else{
+            this.switchMode(0);
+          }
+            //console.log(this.featureAdd);
+        }
     },
     mounted() {
         console.log('获取地图数据.');
