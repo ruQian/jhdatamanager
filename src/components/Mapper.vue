@@ -1,6 +1,10 @@
 <template>  
   <div id="content">
     <div id="map" class="map"></div>
+    <div id="popup" class="ol-popup">
+      <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+      <div id="popup-content"></div>
+    </div>
   </div>
 </template>
 
@@ -18,11 +22,18 @@
   import {Icon, Style} from 'ol/style';
   import {LineString, Point, Polygon} from 'ol/geom';
   import {Vector as VectorLayer} from 'ol/layer';
-  import { Pointer as PointerInteraction,} from 'ol/interaction';
+  import {Pointer as PointerInteraction,} from 'ol/interaction';
   import {toLonLat, fromLonLat} from "ol/proj";
   import {fetchData, uploadFeatureApi} from '../api/index';
   import {Control} from 'ol/control';
   import {defaults as defaultControls} from 'ol/control';
+  import {generateUUID} from '../utils/utils';
+  import Overlay from 'ol/Overlay';  
+  import $ from 'jquery';
+  //import {toStringHDMS} from 'ol/coordinate';
+  import {boundingExtent} from 'ol/extent';
+  import {transformExtent} from 'ol/proj';
+
 
   export default {
     name: 'Mapper',
@@ -36,6 +47,10 @@
             featureLayer:null,
             featureSource:null,
             coordinate_ :null,
+            container:null,// = document.getElementById('popup');
+            content:null,// = document.getElementById('popup-content');
+            closer:null,// = document.getElementById('popup-closer');
+            overlay:null,
 
             //鼠标点击拖动feature需要的变量
             feature_ : null,
@@ -78,7 +93,7 @@
                       this.mapdata = res;
                       this.mapdata.forEach(feature =>{
                             console.log('添加标注点 :' + feature.lon + '-' + feature.lat);
-                            this.AddFeature(feature.lon, feature.lat, this.pointStyle);
+                            this.AddFeature(feature.lon, feature.lat, this.pointStyle, feature.uid);
                         }
                       )
                     }
@@ -126,9 +141,9 @@
           });
           var editHandle = this.handleAddFeature;
           var btn = null;
-          //var extent = boundingExtent(
-          //  [[73.68310533463954,55.71875543651788],
-          //  [135.19995117187501,15.911160631253153]]);
+          var extent = boundingExtent(
+            [[73.68310533463954,55.71875543651788],
+            [135.19995117187501,15.911160631253153]]);
           var RotateNorthControl = /*@__PURE__*/(function (Control) 
           {
               function RotateNorthControl(opt_options) 
@@ -171,7 +186,7 @@
             view: new View({
               center: fromLonLat([103, 34]),
               zoom: 2,
-              //extent: transformExtent(extent, 'EPSG:4326', 'EPSG:3857')
+              extent: transformExtent(extent, 'EPSG:4326', 'EPSG:3857')
             })
           });
           console.log('创建地图');
@@ -189,6 +204,59 @@
                             });
           this.map.addInteraction(pi);
           this.initFeatureStyle();
+          //添加tooltips
+          console.log($('.ol-zoom-in, .ol-zoom-out'));
+          //$('.ol-zoom-in, .ol-zoom-out').tooltip({
+          //                  placement: 'right',
+          //                  container: '#map',
+          //  });
+          /*var b1 = $('.ol-zoom-in');
+          b1.tooltip({
+              placement: 'right',
+              container: '#map',
+            });*/
+          /*
+          $('.ol-zoom-in, .ol-zoom-out').tooltip({
+              placement: 'right',
+              container: '#map',
+            });*/
+
+
+          //获取popup相关元素
+          this.container = document.getElementById('popup');
+          this.content = document.getElementById('popup-content');
+          this.closer = document.getElementById('popup-closer');
+
+          //
+          console.log(this.container);
+          console.log(this.content);
+          console.log(this.closer);
+          //
+
+
+          this.overlay = new Overlay({
+            element: this.container,
+            autoPan: true,
+            autoPanAnimation: {
+              duration: 250,
+            },
+          });
+          //var content = this.content;
+          var overlay = this.overlay;
+          var closer = this.closer;
+          this.closer.onclick = function () {
+            overlay.setPosition(undefined);
+            closer.blur();
+            return false;
+          };
+          this.map.addOverlay(this.overlay);
+          /*this.map.on('singleclick', function (evt) {
+                var coordinate = evt.coordinate;
+                var hdms = toStringHDMS(toLonLat(coordinate));
+                console.log(hdms);
+                content.innerHTML = '详细信息';
+                overlay.setPosition(coordinate);
+              });*/
         },
         initFeatureLayer(){
           this.featureLayer = new VectorLayer();
@@ -197,7 +265,7 @@
               this.featureSource = new VectorSource();
               this.featureLayer.setSource(this.featureSource);
         },
-        AddFeature(lon, lat, style)
+        AddFeature(lon, lat, style, id)
         {
           var pp = fromLonLat([lon, lat]);
           var pF = new Feature(
@@ -206,6 +274,7 @@
                   }
                   );
           pF.setStyle(style);
+          pF.setId(id);
           this.featureSource.addFeature(pF);
           return pF;
         },
@@ -223,15 +292,21 @@
               //向服务器上传该标记点
               var paramsData = new Object();
               var data = new Object();
-              data.name = '';
-              data.uid = '';
+              data.name = 'name';
+              data.uid = generateUUID();
               data.lon = lonlat[0];
               data.lat = lonlat[1];
-              paramsData['data']
-              uploadFeatureApi( ).then(res => {});
-              //添加标注
-              this.AddFeature(lonlat[0], lonlat[1], this.pointStyle);
-              this.switchMode(0);
+              paramsData['data'] = data;
+              uploadFeatureApi( paramsData ).then(res => {
+                        console.log(res);
+                        if(res['status'] != null && res['status'] == 200)
+                        {
+                          //添加标注
+                          this.AddFeature(lonlat[0], lonlat[1], this.pointStyle);
+                          this.switchMode(0);
+                        }
+                }
+              );
           }
           /*
           var map = evt.map;
@@ -247,6 +322,7 @@
         },
         handleDragEvent(evt) 
         {
+          console(evt);
           /*
           var deltaX = evt.coordinate[0] - this.coordinate_[0];
           var deltaY = evt.coordinate[1] - this.coordinate_[1];
@@ -287,12 +363,32 @@
           {
               var lon = evt.coordinate[0];
               var lat = evt.coordinate[1];
-              var lanlat = toLonLat([lon, lat]);
+              //var lanlat = toLonLat([lon, lat]);
               //var pp = fromLonLat([lon, lat]);
               //console.log(pp);'XY'
               var p = this.featureAdd.getGeometry();
               //console.log(lanlat);
               p.setCoordinates([lon, lat]);
+          }
+          if(this.mode == 0)
+          {
+            var map = evt.map;
+            var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+              return feature;
+            });
+            if(feature)
+            {
+              //console.log(feature);
+              var coordinate = evt.coordinate;
+              //var hdms = toStringHDMS(toLonLat(coordinate));
+              console.log(feature.getId());
+              this.content.innerHTML = '该点的详细信息展示。 点击查看文件信息';
+              this.overlay.setPosition(coordinate);
+
+            }else
+            {
+              this.overlay.setPosition(undefined);
+            }
           }
           /*
           if (this.cursor_) 
@@ -379,5 +475,46 @@
 .rotate-north {
   top: 65px;
   left: .5em;
+}
+.ol-popup {
+  position: absolute;
+  background-color: white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #cccccc;
+  bottom: 12px;
+  left: -50px;
+  min-width: 280px;
+}
+.ol-popup:after, .ol-popup:before {
+  top: 100%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+.ol-popup:after {
+  border-top-color: white;
+  border-width: 10px;
+  left: 48px;
+  margin-left: -10px;
+}
+.ol-popup:before {
+  border-top-color: #cccccc;
+  border-width: 11px;
+  left: 48px;
+  margin-left: -11px;
+}
+.ol-popup-closer {
+  text-decoration: none;
+  position: absolute;
+  top: 2px;
+  right: 8px;
+}
+.ol-popup-closer:after {
+  content: "✖";
 }
 </style>
