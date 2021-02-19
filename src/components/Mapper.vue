@@ -307,6 +307,19 @@
                         }
                 }
               );
+          }else
+          if(this.mode == 0)
+          {           
+              var map = evt.map;
+              var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+                return feature;
+              });
+              if(feature)
+              {
+                //跳转新页面
+                console.log('跳转新页面');
+                this.$router.push({path:"/upfile", query:{filename:"file1", url:"www.baidu.com"}});
+              }
           }
           /*
           var map = evt.map;
