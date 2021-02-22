@@ -26,7 +26,7 @@
                         >查看</el-button>
                     </template>
                 </el-table-column>
-                <el-table-column label="上传" width="200" align="center">
+                <el-table-column label="管理" width="200" align="center">
                     <template slot-scope="scope">
                         <go-upload :on-success="onSuccess" multiple :file-list="fileList" :action="action">
                             <el-button 
@@ -35,6 +35,11 @@
                                 @click="handleUpload(scope.$index, scope.row)"
                             >上传</el-button>
                         </go-upload>
+                        <el-button 
+                            type="text"
+                            icon="el-icon-upload"  
+                            @click="handleDelete(scope.$index, scope.row)"
+                        >删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -105,6 +110,35 @@ export default {
             window.open(routeData.href, '_blank');
             */
         },
+        handleDelete(index)
+        {
+            if(index > -1 && index < 3)
+            {
+                if(index == 0)
+                {
+                    this.featureData.file1 = "";
+                }
+                if(index == 1)
+                {
+                    this.featureData.file2 = "";
+                }
+                if(index == 2)
+                {
+                    this.featureData.file3 = "";
+                }
+                console.log(this.featureData );
+                var paramsData = new Object();
+                paramsData["data"] = this.featureData;
+                uploadFeatureApi(paramsData).then(res => {
+                            console.log(res);
+                            if(res['status'] != null && res['status'] == 200)
+                            {
+                                this.tableData[index].url = "";
+                            }
+                    }
+                )
+            }
+        },
         handleUpload(index)
         {
             console.log("上传文件");
@@ -145,8 +179,6 @@ export default {
                             if(res['status'] != null && res['status'] == 200)
                             {
                                 this.tableData[this.uploadrow].url = filePath;
-                                
-                                this.$route.query = this.featureData;
                             }
                     }
                 )
