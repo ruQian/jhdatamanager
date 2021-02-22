@@ -17,18 +17,24 @@
             >
                 <el-table-column prop="filename" label="文件名称" width="180"></el-table-column>
                 <el-table-column prop="url" label="存放地址"></el-table-column>
-                <el-table-column label="操作" width="180" align="center">
+                <el-table-column label="预览" width="200" align="center">
                     <template slot-scope="scope">
                         <el-button
                             type="text"
                             icon="el-icon-view"
                             @click="handleView(scope.$index, scope.row)"
                         >查看</el-button>
-                        <el-button
-                            type="text"
-                            icon="el-icon-upload"
-                            @click="handleUpload( )"
-                        >上传</el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column label="上传" width="200" align="center">
+                    <template slot-scope="scope">
+                        <go-upload :on-success="onSuccess" multiple :file-list="fileList" :action="action">
+                            <el-button 
+                                type="text"
+                                icon="el-icon-upload"  
+                                @click="handleUpload(scope.$index, scope.row)"
+                            >上传</el-button>
+                        </go-upload>
                     </template>
                 </el-table-column>
             </el-table>
@@ -36,23 +42,37 @@
     </div>
 </template>
 
-<script>
+<script>  
+import {uploadFeatureApi} from '../api/index';
 export default {
     name: 'basetable',
     data() {
         return {
+            featureData:null,
+            uploadrow:-1,
             tableData: [],
+            fileList: [],
+            action: 'http://127.0.0.1:7001/api/v1/upload'
         };
     },
     created() {
-        var filename = this.$route.query.filename;
-        var url = this.$route.query.url;
-
+        this.featureData = this.$route.query;
+        var file1 = this.featureData.file1;
+        var file2 = this.featureData.file2;
+        var file3 = this.featureData.file3;
         //this.tableData = new Array();
         var d1 = new Object;
-        d1["filename"] = filename;
-        d1["url"] = url;
-        this.tableData[0] = d1;
+        d1["filename"] = "文件1";
+        d1["url"] = file1;
+        this.tableData.push(d1);
+        var d2 = new Object;
+        d2["filename"] = "文件2";
+        d2["url"] = file2;
+        this.tableData.push(d2);
+        var d3 = new Object;
+        d3["filename"] = "文件3";
+        d3["url"] = file3;
+        this.tableData.push(d3);
         console.log(this.tableData);
         //this.getData();
     },
@@ -61,11 +81,53 @@ export default {
         {
             console.log(index);
             console.log(row);
+            window.open(row.url, '_blank');
+
         },
-        handleUpload()
+        handleUpload(index)
         {
             console.log("上传文件");
-            this.$router.push({path:"/upload"});
+            console.log(index);
+            this.uploadrow = index;
+        },
+        onChange (file) 
+        {
+            //可以得到上传文件进度
+            //console.log('file', file, fileList);
+            console.log(file);
+            console.log(file.percent);
+        },
+        onSuccess(res)
+        {
+            console.log(res);
+            var index = this.uploadrow;
+            if(index > -1 && index < 3)
+            {
+                var filePath = res.data.path;
+                if(index == 0)
+                {
+                    this.featureData.file1 = filePath;
+                }
+                if(index == 1)
+                {
+                    this.featureData.file2 = filePath;
+                }
+                if(index == 2)
+                {
+                    this.featureData.file3 = filePath;
+                }
+                console.log(this.featureData );
+                var paramsData = new Object();
+                paramsData["data"] = this.featureData;
+                uploadFeatureApi(paramsData).then(res => {
+                            console.log(res);
+                            if(res['status'] != null && res['status'] == 200)
+                            {
+                                this.tableData[this.uploadrow].url = filePath;
+                            }
+                    }
+                )
+            }
         }
     }
 };

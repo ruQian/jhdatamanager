@@ -16,20 +16,20 @@
     >
       <slot></slot>
     </div>
-    <upload-list @on-delete="onDelete" :files="this.files"></upload-list>
+    <!--upload-list @on-delete="onDelete" :files="this.files"></upload-list!-->
   </div>
 </template>
 
 <script>
 import request from '@/components/upload/request';
 //import MyProgress from '@/components/upload/progress';
-import UploadList from '@/components/upload/upload-list';
+//import UploadList from '@/components/upload/upload-list';
 import { noop } from '@/shared/util';
 import UploadDragger from '@/components/upload/upload-dragger';
 
 export default {
   name: 'GoUpload',
-  components: { UploadDragger, UploadList},
+  components: { UploadDragger},
   props: {
     name: { type: String, default: 'file' },
     fileList: {

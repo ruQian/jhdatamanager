@@ -104,7 +104,7 @@
         {
             this.editStyle = new Style({
                   image: new Icon({
-                    anchor: [0.5, 0.5],
+                    anchor: [16, 16],
                     anchorXUnits: 'pixels',
                     anchorYUnits: 'pixels',
                     opacity: 1,
@@ -113,7 +113,7 @@
                 });
             this.pointStyle = new Style({
                   image: new Icon({
-                    anchor: [0.5, 0.5],
+                    anchor: [16, 16],
                     anchorXUnits: 'pixels',
                     anchorYUnits: 'pixels',
                     opacity: 1,
@@ -197,10 +197,10 @@
           console.log(btn);
 
           var pi = new PointerInteraction({
-                              handleDownEvent: this.handleDownEvent,
-                              handleDragEvent: this.handleDragEvent,
-                              handleMoveEvent: this.handleMoveEvent,
                               handleUpEvent: this.handleUpEvent,
+                              handleDownEvent: this.handleDownEvent,
+                              //handleDragEvent: this.handleDragEvent,
+                              handleMoveEvent: this.handleMoveEvent,
                             });
           this.map.addInteraction(pi);
           this.initFeatureStyle();
@@ -284,6 +284,22 @@
         },
         handleDownEvent(evt) 
         {
+          if(this.mode == 0)
+          {           
+              var map = evt.map;
+              var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+                return feature;
+              });
+              if(feature)
+              {
+                  return true;
+              }
+          }
+          return false;
+        },
+        handleUpEvent(evt) 
+        {
+          console.log("handleUpEvent");
           if(this.mode == 1)
           {
               var lon = evt.coordinate[0];
@@ -296,6 +312,9 @@
               data.uid = generateUUID();
               data.lon = lonlat[0];
               data.lat = lonlat[1];
+              data.file1 = "";
+              data.file2 = "";
+              data.file3 = "";
               paramsData['data'] = data;
               uploadFeatureApi( paramsData ).then(res => {
                         console.log(res);
@@ -318,7 +337,25 @@
               {
                 //跳转新页面
                 console.log('跳转新页面');
-                this.$router.push({path:"/upfile", query:{filename:"file1", url:"www.baidu.com"}});
+                var id = feature.getId();
+                console.log(this.mapdata);
+                var ele = this.mapdata.find(function(element) {
+                    if(element.uid == id)
+                    {
+                        console.log('res - ' + element);
+                        return element;
+                    }
+                });
+                if(ele != null)
+                {
+                  let routeData = this.$router.resolve({
+                    name: 'upfile',
+                    params: { query:ele}
+                   });
+                   window.open(routeData.href, '_blank');
+
+                  //this.$router.push({path:"/upfile", query:ele});
+                }
               }
           }
           /*
@@ -333,9 +370,8 @@
           }
           return !!feature;*/
         },
-        handleDragEvent(evt) 
-        {
-          console(evt);
+        //handleDragEvent(evt) 
+        //{
           /*
           var deltaX = evt.coordinate[0] - this.coordinate_[0];
           var deltaY = evt.coordinate[1] - this.coordinate_[1];
@@ -346,7 +382,7 @@
 
           this.coordinate_[0] = evt.coordinate[0];
           this.coordinate_[1] = evt.coordinate[1];*/
-        },
+        //},
         switchMode(mode)
         {
             if(mode == 1)
@@ -421,13 +457,6 @@
               this.previousCursor_ = undefined;
             }
           }*/
-        },
-        handleUpEvent() 
-        {
-          /*
-          this.coordinate_ = null;
-          this.feature_ = null;
-          return false;*/
         },
         handleRotateNorth() 
         {
