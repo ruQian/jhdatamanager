@@ -350,7 +350,7 @@
                 {
                   let routeData = this.$router.resolve({
                     path: '/upfile',
-                    query: ele
+                    query: {"uid":ele.uid}
                    });
                    window.open(routeData.href, '_blank');
 

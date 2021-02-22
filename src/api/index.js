@@ -19,3 +19,14 @@ export const uploadFeatureApi = params => {
         data: params["data"]
     });
 };
+
+//根据UID得到一个数据点
+export const getFeatureByUid = params => {
+    //header
+    console.log(params["data"]);
+    return request({
+        url: ApiRootUrl+'featuredata/uid',
+        method: 'get',
+        params: params["data"]
+    });
+};

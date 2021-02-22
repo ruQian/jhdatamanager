@@ -43,11 +43,12 @@
 </template>
 
 <script>  
-import {uploadFeatureApi} from '../api/index';
+import {uploadFeatureApi, getFeatureByUid} from '../api/index';
 export default {
     name: 'basetable',
     data() {
         return {
+            uid:null,
             featureData:null,
             uploadrow:-1,
             tableData: [],
@@ -56,25 +57,33 @@ export default {
         };
     },
     created() {
-        this.featureData = this.$route.query;
-        var file1 = this.featureData.file1;
-        var file2 = this.featureData.file2;
-        var file3 = this.featureData.file3;
-        //this.tableData = new Array();
-        var d1 = new Object;
-        d1["filename"] = "文件1";
-        d1["url"] = file1;
-        this.tableData.push(d1);
-        var d2 = new Object;
-        d2["filename"] = "文件2";
-        d2["url"] = file2;
-        this.tableData.push(d2);
-        var d3 = new Object;
-        d3["filename"] = "文件3";
-        d3["url"] = file3;
-        this.tableData.push(d3);
-        console.log(this.tableData);
-        //this.getData();
+        this.uid = this.$route.query.uid;
+        //根据uid 获取数据
+        var paramsData = new Object();
+        paramsData["data"] = {"uid":this.uid};
+        getFeatureByUid(paramsData).then(res => {
+                console.log(res);
+                this.featureData = res;
+                var file1 = this.featureData.file1;
+                var file2 = this.featureData.file2;
+                var file3 = this.featureData.file3;
+                //this.tableData = new Array();
+                var d1 = new Object;
+                d1["filename"] = "文件1";
+                d1["url"] = file1;
+                this.tableData.push(d1);
+                var d2 = new Object;
+                d2["filename"] = "文件2";
+                d2["url"] = file2;
+                this.tableData.push(d2);
+                var d3 = new Object;
+                d3["filename"] = "文件3";
+                d3["url"] = file3;
+                this.tableData.push(d3);
+                console.log(this.tableData);
+                //this.getData();
+            }
+        )
     },
     methods: {
         handleView(index, row)
@@ -83,8 +92,11 @@ export default {
             console.log(row);
             let url = row.url;//.replace("/", "//");
             console.log(url);
-            window.location.href = "http://127.0.0.1:7001/public/uploads/2021/02/22/1613990023443114.pdf"; 
-            window.open(); 
+            if(url != "")
+            {
+                window.location.href = url; 
+                window.open(); 
+            }
             /*
             let routeData = this.$router.resolve({
                     path: "http://www.baidu.com"
@@ -133,6 +145,8 @@ export default {
                             if(res['status'] != null && res['status'] == 200)
                             {
                                 this.tableData[this.uploadrow].url = filePath;
+                                
+                                this.$route.query = this.featureData;
                             }
                     }
                 )
