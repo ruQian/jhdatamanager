@@ -349,8 +349,8 @@
                 if(ele != null)
                 {
                   let routeData = this.$router.resolve({
-                    name: 'upfile',
-                    params: { query:ele}
+                    path: '/upfile',
+                    query: ele
                    });
                    window.open(routeData.href, '_blank');
 

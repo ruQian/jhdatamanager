@@ -81,8 +81,17 @@ export default {
         {
             console.log(index);
             console.log(row);
-            window.open(row.url, '_blank');
-
+            let url = row.url;//.replace("/", "//");
+            console.log(url);
+            window.location.href = "http://127.0.0.1:7001/public/uploads/2021/02/22/1613990023443114.pdf"; 
+            window.open(); 
+            /*
+            let routeData = this.$router.resolve({
+                    path: "http://www.baidu.com"
+                   });
+                   window.open(routeData.href, '_blank');
+            window.open(routeData.href, '_blank');
+            */
         },
         handleUpload(index)
         {
