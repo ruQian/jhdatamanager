@@ -1,7 +1,7 @@
 <template>
     <div class="login-wrap">
         <div class="ms-login">
-            <div class="ms-title">后台管理系统</div>
+            <div class="ms-title">文件管理系统</div>
             <el-form :model="param" :rules="rules" ref="login" label-width="0px" class="ms-content">
                 <el-form-item prop="username">
                     <el-input v-model="param.username" placeholder="username">
@@ -42,7 +42,7 @@ export default {
         };
     },
     methods: {
-        submitForm() {
+        /*submitForm() {
             this.$refs.login.validate(valid => {
                 if (valid) {
                     this.$message.success('登录成功');
@@ -54,7 +54,7 @@ export default {
                     return false;
                 }
             });
-        },
+        },*/
     },
 };
 </script>
@@ -64,7 +64,7 @@ export default {
     position: relative;
     width: 100%;
     height: 100%;
-    background-image: url(../../assets/img/login-bg.jpg);
+    background-image: url(../assets/img/login-bg.jpg);
     background-size: 100%;
 }
 .ms-title {

@@ -9,8 +9,8 @@ Vue.use(Router);
 //}
 export default new Router({
     routes: [
-        {
-            path: '/',
+        /*{
+            path: '/Mapper',
             component: () => import('../components/Mapper.vue'),
         },
         {
@@ -20,6 +20,14 @@ export default new Router({
         {
             path: '/upload',
             component: () => import('../components/Upload.vue'),
+        },
+        {
+            path: '/login',
+            component: () => import('../components/Login.vue'),
+        },*/
+        {
+            path: '/icon',
+            component: () => import('../components/Icon.vue'),
         }
     ]
 });
