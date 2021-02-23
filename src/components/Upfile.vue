@@ -58,7 +58,7 @@ export default {
             uploadrow:-1,
             tableData: [],
             fileList: [],
-            action: 'http://127.0.0.1:7001/api/v1/upload'
+            action: 'http://www.ylhzzy.top:8828/api/v1/upload'
         };
     },
     created() {
