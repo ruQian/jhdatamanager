@@ -3,7 +3,7 @@ module.exports = {
     assetsDir: 'static',
     productionSourceMap: false,
      devServer: {
-         port: 8080,     // 端口号
+         port: 8829,     // 端口号
 		 disableHostCheck: true,
     //     proxy: {
     //         '/api':{
