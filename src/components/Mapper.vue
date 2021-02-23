@@ -284,6 +284,10 @@
         },
         handleDownEvent(evt) 
         {
+          if(this.mode == 1)
+          {
+              return true;
+          }
           if(this.mode == 0)
           {           
               var map = evt.map;
