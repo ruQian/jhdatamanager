@@ -325,7 +325,7 @@
                         if(res['status'] != null && res['status'] == 200)
                         {
                           //添加标注
-                          this.AddFeature(lonlat[0], lonlat[1], this.pointStyle);
+                          this.AddFeature(lonlat[0], lonlat[1], this.pointStyle, data.uid);
                           this.switchMode(0);
                         }
                 }
