@@ -343,23 +343,12 @@
                 console.log('跳转新页面');
                 var id = feature.getId();
                 console.log(this.mapdata);
-                var ele = this.mapdata.find(function(element) {
-                    if(element.uid == id)
-                    {
-                        console.log('res - ' + element);
-                        return element;
-                    }
-                });
-                if(ele != null)
-                {
-                  let routeData = this.$router.resolve({
-                    path: '/upfile',
-                    query: {"uid":ele.uid}
-                   });
-                   window.open(routeData.href, '_blank');
-
-                  //this.$router.push({path:"/upfile", query:ele});
-                }
+                
+                let routeData = this.$router.resolve({
+                  path: '/upfile',
+                  query: {"uid":id}
+                  });
+                  window.open(routeData.href, '_blank');
               }
           }
           /*
