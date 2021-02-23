@@ -1,5 +1,5 @@
 import request from '../utils/request';
-const ApiRootUrl = 'http://127.0.0.1:8828/api/v1/';
+const ApiRootUrl = 'http://www.ylhzzy.top:8828/api/v1/';
 
 export const fetchData = () => {
     console.log(ApiRootUrl+'featuredata');
