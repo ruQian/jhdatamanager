@@ -5,7 +5,7 @@
             <el-form :model="param" :rules="rules" ref="login" label-width="0px" class="ms-content">
                 <el-form-item prop="username">
                     <el-input v-model="param.username" placeholder="username">
-                        <el-button slot="prepend" icon="el-icon-lx-people"></el-button>
+                        <el-button slot="prepend" icon="el-icon-user"></el-button>
                     </el-input>
                 </el-form-item>
                 <el-form-item prop="password">
@@ -15,7 +15,7 @@
                         v-model="param.password"
                         @keyup.enter.native="submitForm()"
                     >
-                        <el-button slot="prepend" icon="el-icon-lx-lock"></el-button>
+                        <el-button slot="prepend" icon="el-icon-lock"></el-button>
                     </el-input>
                 </el-form-item>
                 <div class="login-btn">
@@ -42,19 +42,19 @@ export default {
         };
     },
     methods: {
-        /*submitForm() {
+        submitForm() {
             this.$refs.login.validate(valid => {
                 if (valid) {
                     this.$message.success('登录成功');
-                    localStorage.setItem('ms_username', this.param.username);
-                    this.$router.push('/');
+                    //localStorage.setItem('ms_username', this.param.username);
+                    this.$router.push('/Mapper');
                 } else {
                     this.$message.error('请输入账号和密码');
                     console.log('error submit!!');
                     return false;
                 }
             });
-        },*/
+        },
     },
 };
 </script>

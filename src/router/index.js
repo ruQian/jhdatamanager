@@ -9,7 +9,7 @@ Vue.use(Router);
 //}
 export default new Router({
     routes: [
-        /*{
+        {
             path: '/Mapper',
             component: () => import('../components/Mapper.vue'),
         },
@@ -24,7 +24,7 @@ export default new Router({
         {
             path: '/login',
             component: () => import('../components/Login.vue'),
-        },*/
+        },
         {
             path: '/icon',
             component: () => import('../components/Icon.vue'),
