@@ -38,6 +38,11 @@
                         <el-button 
                             type="text"
                             icon="el-icon-upload"  
+                            @click="handleNewUpload(scope.$index, scope.row)"
+                        >新上传</el-button>
+                        <el-button 
+                            type="text"
+                            icon="el-icon-upload"  
                             @click="handleDelete(scope.$index, scope.row)"
                         >删除</el-button>
                     </template>
@@ -48,7 +53,7 @@
 </template>
 
 <script>  
-import {uploadFeatureApi, getFeatureByUid} from '../api/index';
+import {uploadFile, uploadFeatureApi, getFeatureByUid} from '../api/index';
 export default {
     name: 'basetable',
     data() {
@@ -138,6 +143,10 @@ export default {
                     }
                 )
             }
+        },
+        handleNewUpload(index, row)
+        {
+            //上传文件
         },
         handleUpload(index)
         {
