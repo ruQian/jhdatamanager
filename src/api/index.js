@@ -30,3 +30,14 @@ export const getFeatureByUid = params => {
         params: params["data"]
     });
 };
+
+//上传一个大文件
+export const uploadFile = params => {
+    //header
+    //console.log(params["data"]);
+    return request({
+        url: ApiRootUrl+'featuredata/uid',
+        method: 'post',
+        data: params["data"]
+    });
+};
