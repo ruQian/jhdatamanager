@@ -25,12 +25,21 @@ Vue.use(ElementUI, {
 //使用钩子函数对路由进行权限跳转
 router.beforeEach((to, from, next) => {
     //document.title = `${to.meta.title} | vue-manage-system`;
-    console.log(to.path);
-    if (to.path == '/')
+    var userAgent = navigator.userAgent; //取得浏览器的userAgent字符串
+    var isChrom = userAgent.indexOf("Chrome") > -1;
+    if(isChrom)
     {
-        next('/login');
+        console.log(to.path);
+        if (to.path == '/')
+        {
+            next('/login');
+        }else{
+              next();
+        }
     }else{
-          next();
+        Vue.prototype.$alert('清使用chrom浏览器或360浏览器', {
+            confirmButtonText: '确定'
+        });
     }
   /*
   const role = localStorage.getItem('ms_username');
