@@ -35,9 +35,12 @@ export const getFeatureByUid = params => {
 export const uploadFile = params => {
     //header
     //console.log(params["data"]);
+    var headerData = new Object();
+    headerData["Content-Type"] = "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW";
     return request({
-        url: ApiRootUrl+'featuredata/uid',
+        url: 'http://127.0.0.1:8828/api/v1/'+'upload',
         method: 'post',
+        headers:headerData,
         data: params["data"]
     });
 };

@@ -8,6 +8,13 @@
             </el-breadcrumb>
         </div>
         <div class="container">
+            <input
+                accept="application/pdf"
+                ref="input"
+                type="file"
+                @change="onInputChange"
+                style="display:none"
+            />
             <el-table
                 :data="tableData"
                 border
@@ -54,6 +61,7 @@
 
 <script>  
 import {uploadFile, uploadFeatureApi, getFeatureByUid} from '../api/index';
+import FormData from 'form-data';
 export default {
     name: 'basetable',
     data() {
@@ -144,9 +152,46 @@ export default {
                 )
             }
         },
+        normalizeFiles (rawFile) {
+            console.log(rawFile);
+        const file = {
+            name: rawFile.name,
+            size: rawFile.size,
+            type: rawFile.type,
+            percent: 0,
+            uid: Date.now(),
+            status: 'init', // value list: init pending success failure
+            raw: rawFile
+        };
+        return file;
+        },
+        startUpload(rawFile){
+            const file = this.normalizeFiles(rawFile);
+            
+            var paramsData = new Object();
+            const formData = new FormData();
+            formData.append("file", file.raw);
+            console.log(formData);
+            paramsData["data"] = formData;
+            //
+            uploadFile(paramsData).then(res => {
+                console.log(res);
+            });
+
+
+        },
+        onInputChange (e) {
+            console.log(e);
+            const rawFiles = Array.from(e.target.files);
+            if(rawFiles.length > 0)
+            {
+                this.startUpload(rawFiles[0]);
+            }
+        },
         handleNewUpload(index, row)
         {
             //上传文件
+            this.$refs.input.click();
         },
         handleUpload(index)
         {

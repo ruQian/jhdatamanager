@@ -40,6 +40,7 @@ const request = ({
     onProgress(e);
   });
   xhr.open('POST', url);
+  console.log(formData);
   xhr.send(formData);
   xhr.addEventListener('load', () => {
     if (xhr.status >= 200 && xhr.status < 300) {
