@@ -23,7 +23,6 @@
                 header-cell-class-name="table-header"
             >
                 <el-table-column prop="filename" label="文件名称" width="180"></el-table-column>
-                <el-table-column prop="url" label="存放地址"></el-table-column>
                 <el-table-column label="预览" width="200" align="center">
                     <template slot-scope="scope">
                         <el-button
@@ -35,13 +34,6 @@
                 </el-table-column>
                 <el-table-column label="管理" width="200" align="center">
                     <template slot-scope="scope">
-                        <go-upload :on-success="onSuccess" multiple :file-list="fileList" :action="action">
-                            <el-button 
-                                type="text"
-                                icon="el-icon-upload"  
-                                @click="handleUpload(scope.$index, scope.row)"
-                            >上传</el-button>
-                        </go-upload>
                         <el-button 
                             type="text"
                             icon="el-icon-upload"  
@@ -49,11 +41,12 @@
                         >新上传</el-button>
                         <el-button 
                             type="text"
-                            icon="el-icon-upload"  
+                            icon="el-icon-delete"  
                             @click="handleDelete(scope.$index, scope.row)"
                         >删除</el-button>
                     </template>
                 </el-table-column>
+                <el-table-column prop="url" label="存放地址"></el-table-column>
             </el-table>
         </div>
     </div>
@@ -70,8 +63,6 @@ export default {
             featureData:null,
             uploadrow:-1,
             tableData: [],
-            fileList: [],
-            action: 'http://www.ylhzzy.top:8828/api/v1/upload'
         };
     },
     created() {
@@ -173,6 +164,7 @@ export default {
             formData.append("file", file.raw);
             console.log(formData);
             paramsData["data"] = formData;
+            paramsData["OnUploadProgress"] = this.onUploadProgress;
             //
             uploadFile(paramsData).then(res => {
                 console.log(res);
@@ -198,6 +190,9 @@ export default {
             console.log("上传文件");
             console.log(index);
             this.uploadrow = index;
+        },
+        onUploadProgress (progress) {
+            console.log(progress);
         },
         onChange (file) 
         {

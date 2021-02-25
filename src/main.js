@@ -18,7 +18,7 @@ Vue.component(GoButton.name, GoButton);
 Vue.component(GoIcon.name, GoIcon);
 Vue.component(GoUpload.name, GoUpload);
 Vue.use(ElementUI, {
-  size: 'small'
+  size: 'big'
 });
 
 

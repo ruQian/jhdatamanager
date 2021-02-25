@@ -152,6 +152,8 @@ export default {
       this.onSuccess(response, file, this.files);
     },
     handleProgress (file, event) {
+      console.log("=-=========================");
+      console.log(event);
       file.percent = event.percent;
       this.onChange(file, this.files);
       this.onProgress(event, file, this.files);

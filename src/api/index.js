@@ -40,6 +40,7 @@ export const uploadFile = params => {
     return request({
         url: 'http://127.0.0.1:8828/api/v1/'+'upload',
         method: 'post',
+        onUploadProgress:params["OnUploadProgress"],
         headers:headerData,
         data: params["data"]
     });
