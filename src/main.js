@@ -11,6 +11,10 @@ import '@/assets/styles/index.scss';
 
 import GoUpload from '@/components/upload/upload';
 import './assets/css/icon.css';
+import ProgressBar from 'vuejs-progress-bar';
+
+
+
 
 Vue.config.productionTip = false
 
@@ -20,6 +24,7 @@ Vue.component(GoUpload.name, GoUpload);
 Vue.use(ElementUI, {
   size: 'big'
 });
+Vue.use(ProgressBar);
 
 
 //使用钩子函数对路由进行权限跳转

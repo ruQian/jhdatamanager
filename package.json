@@ -16,7 +16,8 @@
     "projzh": "^1.0.0",
     "vue": "^2.6.11",
     "vue-file-upload": "^0.1.12",
-    "vue-router": "^3.5.1"
+    "vue-router": "^3.5.1",
+    "vuejs-progress-bar": "^1.2.4"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

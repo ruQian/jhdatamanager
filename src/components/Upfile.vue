@@ -39,11 +39,21 @@
                             icon="el-icon-upload"  
                             @click="handleNewUpload(scope.$index, scope.row)"
                         >新上传</el-button>
-                        <el-button 
+                        <progress-bar
+                            class="progress-bar"
+                            :options="options"
+                            :value="value"
+                        >haha</progress-bar>
+                    
+                        <button 
+                            type="text"
+                            icon="el-icon-upload"
+                        >新上传</button>
+                        <!--el-button 
                             type="text"
                             icon="el-icon-delete"  
                             @click="handleDelete(scope.$index, scope.row)"
-                        >删除</el-button>
+                        >删除</el-button!-->
                     </template>
                 </el-table-column>
                 <el-table-column prop="url" label="存放地址"></el-table-column>
@@ -63,6 +73,33 @@ export default {
             featureData:null,
             uploadrow:-1,
             tableData: [],
+            options: {
+                text: {
+                    color: '#FFFFFF',
+                    shadowEnable: true,
+                    shadowColor: '#000000',
+                    fontSize: 10,
+                    fontFamily: 'Helvetica',
+                    dynamicPosition: false,
+                    hideText: false
+                },
+                progress: {
+                    color: '#2dbd2d',
+                    backgroundColor: '#333333'
+                },
+                layout: {
+                    height: 12,
+                    width: 100,
+                    verticalTextAlign: 70,
+                    horizontalTextAlign: 45,
+                    zeroOffset: 0,
+                    strokeWidth: 100,
+                    progressPadding: 0,
+                    type: 'line'
+                }
+            },
+            value:10
+
         };
     },
     created() {
@@ -266,4 +303,21 @@ export default {
     width: 40px;
     height: 40px;
 }
+.mongolia{
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+.progress-bar {
+  display: inline-block;
+  width: 100;
+  line-height: 20px;
+}
+
+
 </style>
