@@ -38,17 +38,14 @@
                             type="text"
                             icon="el-icon-upload"  
                             @click="handleNewUpload(scope.$index, scope.row)"
-                        >新上传</el-button>
+                            v-if=tableData[scope.$index].bUpBtnShow
+                        >{{tableData[scope.$index].uploadBtnText}}</el-button>
                         <progress-bar
                             class="progress-bar"
                             :options="options"
-                            :value="value"
-                        >haha</progress-bar>
-                    
-                        <button 
-                            type="text"
-                            icon="el-icon-upload"
-                        >新上传</button>
+                            :value=tableData[scope.$index].value
+                            :style=tableData[scope.$index].style
+                        ></progress-bar>
                         <!--el-button 
                             type="text"
                             icon="el-icon-delete"  
@@ -98,7 +95,9 @@ export default {
                     type: 'line'
                 }
             },
-            value:10
+            value:[10, 10, 10],
+            styles:["display:inline-block","display:none", "display:none"],
+            uploadBtnText:"上传"
 
         };
     },
@@ -117,14 +116,27 @@ export default {
                 var d1 = new Object;
                 d1["filename"] = "文件1";
                 d1["url"] = file1;
+                d1["value"] = 0;
+                d1["style"] = "display:none";
+                d1["bUpBtnShow"] = true;
+                d1["uploadBtnText"] = "上传";
                 this.tableData.push(d1);
                 var d2 = new Object;
                 d2["filename"] = "文件2";
                 d2["url"] = file2;
+                d2["value"] = 0;
+                d2["style"] = "display:none";
+                d2["bUpBtnShow"] = true;
+                d2["uploadBtnText"] = "上传";
                 this.tableData.push(d2);
+                d1["bUpBtnShow"] = true;
                 var d3 = new Object;
                 d3["filename"] = "文件3";
                 d3["url"] = file3;
+                d3["value"] = 0;
+                d3["style"] = "display:none";
+                d3["bUpBtnShow"] = true;
+                d3["uploadBtnText"] = "上传";
                 this.tableData.push(d3);
                 console.log(this.tableData);
                 //this.getData();
@@ -195,22 +207,20 @@ export default {
         },
         startUpload(rawFile){
             const file = this.normalizeFiles(rawFile);
-            
             var paramsData = new Object();
             const formData = new FormData();
             formData.append("file", file.raw);
             console.log(formData);
             paramsData["data"] = formData;
-            paramsData["OnUploadProgress"] = this.onUploadProgress;
+            paramsData["OnUploadProgress"] = this.onUploadProgress.bind(this, this.uploadrow);
             //
             uploadFile(paramsData).then(res => {
                 console.log(res);
             });
-
-
         },
         onInputChange (e) {
             console.log(e);
+            this.showProcess(this.uploadrow, true);
             const rawFiles = Array.from(e.target.files);
             if(rawFiles.length > 0)
             {
@@ -219,17 +229,17 @@ export default {
         },
         handleNewUpload(index, row)
         {
+            this.uploadrow = index;
             //上传文件
             this.$refs.input.click();
         },
-        handleUpload(index)
-        {
-            console.log("上传文件");
-            console.log(index);
-            this.uploadrow = index;
-        },
-        onUploadProgress (progress) {
+        onUploadProgress (index, progress) {
             console.log(progress);
+            var td = this.tableData[index];
+            if(typeof(td) != "undefined")
+            {
+                td.value = (progress.loaded/progress.total)*100;
+            }
         },
         onChange (file) 
         {
@@ -268,6 +278,29 @@ export default {
                             }
                     }
                 )
+            }
+        },
+        showProcess(index, bShow)
+        {
+            var td = this.tableData[index];
+            if(typeof(td) != "undefined")
+            {
+                if(bShow)
+                {
+                    if(td["bUpBtnShow"] == true)
+                    {
+                        td["style"] = "display:inline-block";
+                        td["bUpBtnShow"] = false;
+                    }
+                }
+                else
+                {
+                    if(td["bUpBtnShow"] == false)
+                    {
+                        td["style"] = "display:none";
+                        td["bUpBtnShow"] = true;
+                    }
+                }
             }
         }
     }
@@ -314,8 +347,7 @@ export default {
     left: 0;
 }
 .progress-bar {
-  display: inline-block;
-  width: 100;
+  width: 100px;
   line-height: 20px;
 }
 
