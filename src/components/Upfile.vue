@@ -205,7 +205,7 @@ export default {
         };
         return file;
         },
-        startUpload(rawFile){
+        startUpload(rawFile, index){
             const file = this.normalizeFiles(rawFile);
             var paramsData = new Object();
             const formData = new FormData();
@@ -216,6 +216,12 @@ export default {
             //
             uploadFile(paramsData).then(res => {
                 console.log(res);
+                if(res['code'] != null && res['code'] == 200)
+                {
+                    var filePath = res.data.path;
+                    console.log(filePath);
+                    this.tableData[index].url = filePath;
+                }
             });
         },
         onInputChange (e) {
@@ -224,8 +230,9 @@ export default {
             const rawFiles = Array.from(e.target.files);
             if(rawFiles.length > 0)
             {
-                this.startUpload(rawFiles[0]);
+                this.startUpload(rawFiles[0], this.uploadrow);
             }
+            this.$refs.input.value = '';
         },
         handleNewUpload(index, row)
         {
@@ -239,45 +246,10 @@ export default {
             if(typeof(td) != "undefined")
             {
                 td.value = (progress.loaded/progress.total)*100;
-            }
-        },
-        onChange (file) 
-        {
-            //可以得到上传文件进度
-            //console.log('file', file, fileList);
-            console.log(file);
-            console.log(file.percent);
-        },
-        onSuccess(res)
-        {
-            console.log(res);
-            var index = this.uploadrow;
-            if(index > -1 && index < 3)
-            {
-                var filePath = res.data.path;
-                if(index == 0)
+                if(progress.loaded == progress.total)
                 {
-                    this.featureData.file1 = filePath;
+                    this.showProcess(index, false);
                 }
-                if(index == 1)
-                {
-                    this.featureData.file2 = filePath;
-                }
-                if(index == 2)
-                {
-                    this.featureData.file3 = filePath;
-                }
-                console.log(this.featureData );
-                var paramsData = new Object();
-                paramsData["data"] = this.featureData;
-                uploadFeatureApi(paramsData).then(res => {
-                            console.log(res);
-                            if(res['status'] != null && res['status'] == 200)
-                            {
-                                this.tableData[this.uploadrow].url = filePath;
-                            }
-                    }
-                )
             }
         },
         showProcess(index, bShow)
