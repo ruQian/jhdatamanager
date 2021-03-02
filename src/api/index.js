@@ -36,12 +36,12 @@ export const uploadFile = params => {
     //header
     //console.log(params["data"]);
     var headerData = new Object();
-    headerData["Content-Type"] = "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW";
+    //headerData["Content-Type"] = "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW";
     return request({
         url: 'http://127.0.0.1:8828/api/v1/'+'upload',
         method: 'post',
         onUploadProgress:params["OnUploadProgress"],
-        headers:headerData,
+        //headers:headerData,
         data: params["data"]
     });
 };
