@@ -18,10 +18,6 @@ export default new Router({
             component: () => import('../components/Upfile.vue'),
         },
         {
-            path: '/upload',
-            component: () => import('../components/Upload.vue'),
-        },
-        {
             path: '/login',
             component: () => import('../components/Login.vue'),
         },
