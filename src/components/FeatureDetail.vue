@@ -29,6 +29,7 @@
                             type="text"
                             icon="el-icon-view"
                             @click="handleView(scope.$index, scope.row)"
+                            :disabled=!tableData[scope.$index].bdeleteBtnShow
                         >查看</el-button>
                     </template>
                 </el-table-column>
@@ -46,11 +47,12 @@
                             :value=tableData[scope.$index].value
                             :style=tableData[scope.$index].style
                         ></progress-bar>
-                        <!--el-button 
+                        <el-button 
                             type="text"
                             icon="el-icon-delete"  
                             @click="handleDelete(scope.$index, scope.row)"
-                        >删除</el-button!-->
+                            v-if=tableData[scope.$index].bdeleteBtnShow
+                        >删除</el-button>
                     </template>
                 </el-table-column>
                 <el-table-column prop="url" label="存放地址"></el-table-column>
@@ -95,9 +97,6 @@ export default {
                     type: 'line'
                 }
             },
-            value:[10, 10, 10],
-            styles:["display:inline-block","display:none", "display:none"],
-            uploadBtnText:"上传"
 
         };
     },
@@ -119,7 +118,8 @@ export default {
                 d1["value"] = 0;
                 d1["style"] = "display:none";
                 d1["bUpBtnShow"] = true;
-                d1["uploadBtnText"] = "上传";
+                d1["bdeleteBtnShow"] = d1["url"] != "";
+                d1["uploadBtnText"] = d1["url"] == ""?"上传":"更新";
                 this.tableData.push(d1);
                 var d2 = new Object;
                 d2["filename"] = "文件2";
@@ -127,16 +127,17 @@ export default {
                 d2["value"] = 0;
                 d2["style"] = "display:none";
                 d2["bUpBtnShow"] = true;
-                d2["uploadBtnText"] = "上传";
+                d2["bdeleteBtnShow"] = d2["url"] != "";
+                d2["uploadBtnText"] = d2["url"] == ""?"上传":"更新";
                 this.tableData.push(d2);
-                d1["bUpBtnShow"] = true;
                 var d3 = new Object;
                 d3["filename"] = "文件3";
                 d3["url"] = file3;
                 d3["value"] = 0;
                 d3["style"] = "display:none";
                 d3["bUpBtnShow"] = true;
-                d3["uploadBtnText"] = "上传";
+                d3["bdeleteBtnShow"] = d3["url"] != "";
+                d3["uploadBtnText"] = d3["url"] == ""?"上传":"更新";
                 this.tableData.push(d3);
                 console.log(this.tableData);
                 //this.getData();
@@ -187,6 +188,7 @@ export default {
                             if(res['status'] != null && res['status'] == 200)
                             {
                                 this.tableData[index].url = "";
+                                this.updateBtmText(index);
                             }
                     }
                 )
@@ -242,6 +244,7 @@ export default {
                             {
                                 console.log(filePath);
                                 this.tableData[index].url = filePath;
+                                this.updateBtmText(index);
                             }
                         }
                     )
@@ -269,7 +272,7 @@ export default {
             var td = this.tableData[index];
             if(typeof(td) != "undefined")
             {
-                td.value = (progress.loaded/progress.total)*100;
+                td.value = parseInt((progress.loaded/progress.total)*100);
                 if(progress.loaded == progress.total)
                 {
                     this.showProcess(index, false);
@@ -286,6 +289,7 @@ export default {
                     if(td["bUpBtnShow"] == true)
                     {
                         td["style"] = "display:inline-block";
+                        td["bdeleteBtnShow"] = false;
                         td["bUpBtnShow"] = false;
                     }
                 }
@@ -294,10 +298,24 @@ export default {
                     if(td["bUpBtnShow"] == false)
                     {
                         td["style"] = "display:none";
+                        td["bdeleteBtnShow"] = true;
                         td["bUpBtnShow"] = true;
                     }
                 }
             }
+        },
+        updateBtmText(index)
+        {
+            var td = this.tableData[index];
+            if(typeof(td) != "undefined")
+            {
+                td["bdeleteBtnShow"] = td["url"] != "";
+                td["uploadBtnText"] = td["url"] == ""?"上传":"更新";
+            }
+        },
+        viewBtnEnable()
+        {
+            return false;
         }
     }
 };

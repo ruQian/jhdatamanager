@@ -41,7 +41,7 @@ export const uploadFile = params => {
     var headerData = new Object();
     //headerData["Content-Type"] = "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW";
     return request({
-        timeout: 50000,
+        timeout: 500000,
         url: ApiRootUrl+'upload',
         method: 'post',
         onUploadProgress:params["OnUploadProgress"],
