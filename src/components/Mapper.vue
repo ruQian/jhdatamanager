@@ -414,7 +414,7 @@
                 console.log(this.mapdata);
                 
                 let routeData = this.$router.resolve({
-                  path: '/upfile',
+                  path: '/featureDetail',
                   query: {"uid":id}
                   });
                   window.open(routeData.href, '_blank');

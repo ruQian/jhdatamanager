@@ -14,8 +14,8 @@ export default new Router({
             component: () => import('../components/Mapper.vue'),
         },
         {
-            path: '/upfile',
-            component: () => import('../components/Upfile.vue'),
+            path: '/featureDetail',
+            component: () => import('../components/FeatureDetail.vue'),
         },
         {
             path: '/login',
