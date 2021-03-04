@@ -38,7 +38,7 @@ export const uploadFile = params => {
     var headerData = new Object();
     //headerData["Content-Type"] = "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW";
     return request({
-        url: 'http://127.0.0.1:8828/api/v1/'+'upload',
+        url: ApiRootUrl+'upload',
         method: 'post',
         onUploadProgress:params["OnUploadProgress"],
         //headers:headerData,
