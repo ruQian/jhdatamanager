@@ -4,6 +4,7 @@ const ApiRootUrl = 'http://www.ylhzzy.top:8828/api/v1/';
 export const fetchData = () => {
     console.log(ApiRootUrl+'featuredata');
     return request({
+        timeout: 5000,
         url:  ApiRootUrl+'featuredata',
         method: 'get'
     });
@@ -14,6 +15,7 @@ export const fetchData = () => {
 export const uploadFeatureApi = params => {
     //header
     return request({
+        timeout: 5000,
         url: ApiRootUrl+'featuredata',
         method: 'post',
         data: params["data"]
@@ -25,6 +27,7 @@ export const getFeatureByUid = params => {
     //header
     console.log(params["data"]);
     return request({
+        timeout: 5000,
         url: ApiRootUrl+'featuredata/uid',
         method: 'get',
         params: params["data"]
@@ -38,6 +41,7 @@ export const uploadFile = params => {
     var headerData = new Object();
     //headerData["Content-Type"] = "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW";
     return request({
+        timeout: 50000,
         url: ApiRootUrl+'upload',
         method: 'post',
         onUploadProgress:params["OnUploadProgress"],
