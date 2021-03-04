@@ -221,8 +221,30 @@ export default {
                 if(res['code'] != null && res['code'] == 200)
                 {
                     var filePath = res.data.path;
-                    console.log(filePath);
-                    this.tableData[index].url = filePath;
+                    if(index == 0)
+                    {
+                        this.featureData.file1 = filePath;
+                    }
+                    if(index == 1)
+                    {
+                        this.featureData.file2 = filePath;
+                    }
+                    if(index == 2)
+                    {
+                        this.featureData.file3 = filePath;
+                    }
+                    var paramsData = new Object();
+                    paramsData['data'] = this.featureData;
+                    //上传文件路径到数据库
+                    uploadFeatureApi(paramsData).then(res => {
+                            console.log(res);
+                            if(res['status'] == 200)
+                            {
+                                console.log(filePath);
+                                this.tableData[index].url = filePath;
+                            }
+                        }
+                    )
                 }
             });
         },
