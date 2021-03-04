@@ -193,7 +193,9 @@ export default {
             }
         },
         normalizeFiles (rawFile) {
+            console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
             console.log(rawFile);
+            console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         const file = {
             name: rawFile.name,
             size: rawFile.size,
@@ -225,7 +227,7 @@ export default {
             });
         },
         onInputChange (e) {
-            console.log(e);
+            console.log(e.target.files[0]);
             this.showProcess(this.uploadrow, true);
             const rawFiles = Array.from(e.target.files);
             if(rawFiles.length > 0)
