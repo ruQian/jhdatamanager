@@ -1,12 +1,12 @@
 <template>
     <div>
-        <div class="crumbs">
+        <!--div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item>
                     <i class="el-icon-lx-cascades"></i> 标注详细信息
                 </el-breadcrumb-item>
             </el-breadcrumb>
-        </div>
+        </div!-->
         <div class="container">
             <input
                 accept="application/pdf"
@@ -57,6 +57,10 @@
                 </el-table-column>
                 <el-table-column prop="url" label="存放地址"></el-table-column>
             </el-table>
+        </div>
+        
+        <div class="crop-demo">
+            <img src="http://www.ylhzzy.top:8828/public/test/unity.jpg"  class="pre-img"/>
         </div>
     </div>
 </template>
@@ -364,6 +368,17 @@ export default {
   width: 100px;
   line-height: 20px;
 }
-
-
+.pre-img{   
+    width: 100px;
+    height: 100px;
+    background: #f8f8f8;
+    border: 1px solid #eee;
+    border-radius: 5px;
+}
+.crop-demo{
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: flex-end;
+}
 </style>

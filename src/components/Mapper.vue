@@ -2,8 +2,8 @@
   <div id="content">
     <div id="map" class="map"></div>
     <div id="popup" class="ol-popup">
-      <a href="#" id="popup-closer" class="ol-popup-closer"></a>
       <div id="popup-content"></div>
+      <img :src="featureImage">
     </div>
   </div>
 </template>
@@ -53,7 +53,7 @@
             coordinate_ :null,
             container:null,// = document.getElementById('popup');
             content:null,// = document.getElementById('popup-content');
-            closer:null,// = document.getElementById('popup-closer');
+            featureImage:"",
             overlay:null,
 
             //鼠标点击拖动feature需要的变量
@@ -294,7 +294,6 @@
           //获取popup相关元素
           this.container = document.getElementById('popup');
           this.content = document.getElementById('popup-content');
-          this.closer = document.getElementById('popup-closer');
 
           //
           console.log(this.container);
@@ -311,13 +310,13 @@
             },
           });
           //var content = this.content;
-          var overlay = this.overlay;
-          var closer = this.closer;
-          this.closer.onclick = function () {
-            overlay.setPosition(undefined);
-            closer.blur();
-            return false;
-          };
+          //var overlay = this.overlay;
+          //var closer = this.closer;
+          //this.closer.onclick = function () {
+          //  overlay.setPosition(undefined);
+          //  closer.blur();
+          //  return false;
+          //};
           this.map.addOverlay(this.overlay);
           /*this.map.on('singleclick', function (evt) {
                 var coordinate = evt.coordinate;
@@ -603,14 +602,5 @@
   border-width: 11px;
   left: 48px;
   margin-left: -11px;
-}
-.ol-popup-closer {
-  text-decoration: none;
-  position: absolute;
-  top: 2px;
-  right: 8px;
-}
-.ol-popup-closer:after {
-  content: "✖";
 }
 </style>
