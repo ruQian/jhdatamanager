@@ -3,7 +3,7 @@
     <div id="map" class="map"></div>
     <div id="popup" class="ol-popup">
       <div id="popup-content"></div>
-      <img :src="featureImage">
+      <img :src="featureImage" class="pre-img"/>
     </div>
   </div>
 </template>
@@ -53,7 +53,7 @@
             coordinate_ :null,
             container:null,// = document.getElementById('popup');
             content:null,// = document.getElementById('popup-content');
-            featureImage:"",
+            featureImage:"http://www.ylhzzy.top:8828/public/test/unity.jpg",
             overlay:null,
 
             //鼠标点击拖动feature需要的变量
@@ -602,5 +602,12 @@
   border-width: 11px;
   left: 48px;
   margin-left: -11px;
+}
+.pre-img{   
+    width: 300px;
+    height: 300px;
+    background: #f8f8f8;
+    border: 1px solid #eee;
+    border-radius: 5px;
 }
 </style>
