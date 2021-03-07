@@ -30,7 +30,14 @@
                             icon="el-icon-view"
                             @click="handleView(scope.$index, scope.row)"
                             :disabled=!tableData[scope.$index].bdeleteBtnShow
+                            v-if=tableData[scope.$index].bViewBtnShow
                         >查看</el-button>
+                        <progress-bar
+                            class="progress-bar"
+                            :options="options"
+                            :value=tableData[scope.$index].downvalue
+                            v-if=tableData[scope.$index].bDownProcessShow
+                        ></progress-bar>
                     </template>
                 </el-table-column>
                 <el-table-column label="管理" width="200" align="center">
@@ -45,7 +52,7 @@
                             class="progress-bar"
                             :options="options"
                             :value=tableData[scope.$index].value
-                            :style=tableData[scope.$index].style
+                            v-if=tableData[scope.$index].bUpProcessShow
                         ></progress-bar>
                         <el-button 
                             type="text"
@@ -66,7 +73,7 @@
 </template>
 
 <script>  
-import {uploadFile, uploadFeatureApi, getFeatureByUid} from '../api/index';
+import {downloadFile, uploadFile, uploadFeatureApi, getFeatureByUid} from '../api/index';
 import FormData from 'form-data';
 export default {
     name: 'basetable',
@@ -120,27 +127,36 @@ export default {
                 d1["filename"] = "文件1";
                 d1["url"] = file1;
                 d1["value"] = 0;
-                d1["style"] = "display:none";
+                d1["bUpProcessShow"] = false;
+                d1["downvalue"] = 0;
+                d1["bDownProcessShow"] = false;
                 d1["bUpBtnShow"] = true;
                 d1["bdeleteBtnShow"] = d1["url"] != "";
+                d1["bViewBtnShow"] = true;
                 d1["uploadBtnText"] = d1["url"] == ""?"上传":"更新";
                 this.tableData.push(d1);
                 var d2 = new Object;
                 d2["filename"] = "文件2";
                 d2["url"] = file2;
                 d2["value"] = 0;
-                d2["style"] = "display:none";
+                d2["bUpProcessShow"] =  false;
+                d2["downvalue"] = 0;
+                d2["bDownProcessShow"] = false;
                 d2["bUpBtnShow"] = true;
                 d2["bdeleteBtnShow"] = d2["url"] != "";
+                d2["bViewBtnShow"] = true;
                 d2["uploadBtnText"] = d2["url"] == ""?"上传":"更新";
                 this.tableData.push(d2);
                 var d3 = new Object;
                 d3["filename"] = "文件3";
                 d3["url"] = file3;
                 d3["value"] = 0;
-                d3["style"] = "display:none";
+                d3["bUpProcessShow"] = false;
+                d3["downvalue"] = 0;
+                d3["bDownProcessShow"] =  false;
                 d3["bUpBtnShow"] = true;
                 d3["bdeleteBtnShow"] = d3["url"] != "";
+                d3["bViewBtnShow"] = true;
                 d3["uploadBtnText"] = d3["url"] == ""?"上传":"更新";
                 this.tableData.push(d3);
                 console.log(this.tableData);
@@ -151,22 +167,38 @@ export default {
     methods: {
         handleView(index, row)
         {
+            this.showDownProcess(index, true);
             console.log(index);
             console.log(row);
             let url = row.url;//.replace("/", "//");
+            var paramsData = new Object();
+            paramsData['url'] = url;
+            paramsData["onDownloadProgress"] = this.onDownloadProgress.bind(this, index);
+            downloadFile(paramsData).then(res => {
+                        console.log(res);
+                        //this.savaFile(res);
+                    });
+            /*
             console.log(url);
             if(url != "")
             {
                 window.location.href = url; 
                 window.open(); 
             }
-            /*
-            let routeData = this.$router.resolve({
-                    path: "http://www.baidu.com"
-                   });
-                   window.open(routeData.href, '_blank');
-            window.open(routeData.href, '_blank');
             */
+        },
+        savaFile(data) {
+            // 文件导出
+            if (!data) {
+            return
+            }
+            let url = window.URL.createObjectURL(new Blob([data]));
+            let link = document.createElement('a');
+            link.style.display = 'none';
+            link.href = url;
+            link.setAttribute('download', '1.pdf');
+            document.body.appendChild(link);
+            link.click()
         },
         handleDelete(index)
         {
@@ -283,6 +315,18 @@ export default {
                 }
             }
         },
+        onDownloadProgress (index, progress) {
+            console.log(progress);
+            var td = this.tableData[index];
+            if(typeof(td) != "undefined")
+            {
+                td.downvalue = parseInt((progress.loaded/progress.total)*100);
+                if(progress.loaded == progress.total)
+                {
+                    this.showDownProcess(index, false);
+                }
+            }
+        },
         showProcess(index, bShow)
         {
             var td = this.tableData[index];
@@ -292,7 +336,7 @@ export default {
                 {
                     if(td["bUpBtnShow"] == true)
                     {
-                        td["style"] = "display:inline-block";
+                        td["bUpProcessShow"] = true;
                         td["bdeleteBtnShow"] = false;
                         td["bUpBtnShow"] = false;
                     }
@@ -301,9 +345,32 @@ export default {
                 {
                     if(td["bUpBtnShow"] == false)
                     {
-                        td["style"] = "display:none";
+                        td["bUpProcessShow"] =  false;
                         td["bdeleteBtnShow"] = true;
                         td["bUpBtnShow"] = true;
+                    }
+                }
+            }
+        },
+        showDownProcess(index, bShow)
+        {
+            var td = this.tableData[index];
+            if(typeof(td) != "undefined")
+            {
+                if(bShow)
+                {
+                    if(td["bViewBtnShow"] == true)
+                    {
+                        td["bDownProcessShow"] = true;
+                        td["bViewBtnShow"] = false;
+                    }
+                }
+                else
+                {
+                    if(td["bViewBtnShow"] == false)
+                    {
+                        td["bDownProcessShow"] = false;
+                        td["bViewBtnShow"] = true;
                     }
                 }
             }
@@ -365,6 +432,7 @@ export default {
     left: 0;
 }
 .progress-bar {
+  display:inline-block;
   width: 100px;
   line-height: 20px;
 }

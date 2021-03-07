@@ -49,3 +49,25 @@ export const uploadFile = params => {
         data: params["data"]
     });
 };
+//下载文件
+export const downloadFile = params => {  
+    return request({
+        method: 'get',
+        url: params['url'],
+        onDownloadProgress:params["onDownloadProgress"]
+    });
+};
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
